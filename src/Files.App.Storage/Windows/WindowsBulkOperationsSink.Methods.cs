@@ -1,8 +1,6 @@
 ﻿// Copyright (c) Files Community
 // Licensed under the MIT License.
 
-using Files.App.CsWin32;
-using Windows.Win32;
 using Windows.Win32.Foundation;
 using Windows.Win32.UI.Shell;
 
@@ -10,7 +8,7 @@ namespace Files.App.Storage
 {
 	public sealed partial class WindowsBulkOperations : IDisposable
 	{
-		private unsafe partial struct WindowsBulkOperationsSink : IFileOperationProgressSink.Interface, IActionProgress.Interface
+		private unsafe partial struct WindowsBulkOperationsSink : IFileOperationProgressSink.Interface
 		{
 			public HRESULT StartOperations()
 			{
@@ -144,11 +142,12 @@ namespace Files.App.Storage
 				return HRESULT.E_FAIL;
 			}
 
-			HRESULT IFileOperationProgressSink.Interface.UpdateProgress(uint iWorkTotal, uint iWorkSoFar)
+			public HRESULT UpdateProgress(uint iWorkTotal, uint iWorkSoFar)
 			{
 				if (_operationsHandle.Target is WindowsBulkOperations operations)
 				{
-					operations.ProgressUpdated?.Invoke(operations, new(iWorkSoFar, iWorkTotal, null));
+					var percentage = iWorkTotal is 0 ? 0 : iWorkSoFar * 100.0 / iWorkTotal;
+					operations.ProgressUpdated?.Invoke(operations, new((int)percentage, null));
 					return HRESULT.S_OK;
 				}
 
@@ -168,41 +167,6 @@ namespace Files.App.Storage
 			public HRESULT ResumeTimer()
 			{
 				return HRESULT.E_NOTIMPL;
-			}
-
-			public HRESULT Begin(ACTION_TYPE action, CONNECT_INFO* pConnectInfo)
-			{
-				return HRESULT.S_OK;
-			}
-
-			public HRESULT UpdateProgress(ulong ulBytesCompleted, ulong ulBytesTotal)
-			{
-				if (_operationsHandle.Target is WindowsBulkOperations operations)
-				{
-					operations.ProgressUpdated?.Invoke(operations, new(ulBytesCompleted, ulBytesTotal, null));
-					return HRESULT.S_OK;
-				}
-
-				return HRESULT.E_FAIL;
-			}
-
-			public HRESULT UpdateText(SPACTIONTEXT sptext, PCWSTR pszText, BOOL fMayCompact)
-			{
-				return HRESULT.S_OK;
-			}
-
-			public HRESULT QueryCancel(BOOL* pfCancelled)
-			{
-				if (pfCancelled is null)
-					return HRESULT.E_POINTER;
-
-				*pfCancelled = false;
-				return HRESULT.S_OK;
-			}
-
-			public HRESULT End()
-			{
-				return HRESULT.S_OK;
 			}
 		}
 	}

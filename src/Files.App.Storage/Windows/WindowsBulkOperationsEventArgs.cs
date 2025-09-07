@@ -27,19 +27,4 @@ namespace Files.App.Storage
 		public override string ToString()
 			=> $"Hr:\"{Result}\"; Src:\"{SourceItem}\"; Dst:\"{DestinationFolder}\"; New:\"{NewlyCreated}\"; Name:\"{Name}\"";
 	}
-
-	public delegate void WindowsBulkOperationsProgressChangedEventHandler(object sender, WindowsBulkOperationsProgressChangedEventArgs e);
-
-	public class WindowsBulkOperationsProgressChangedEventArgs : System.ComponentModel.ProgressChangedEventArgs
-	{
-		public ulong BytesTransferred { get; }
-		public ulong TotalBytes { get; }
-
-		public WindowsBulkOperationsProgressChangedEventArgs(ulong bytesTransferred, ulong totalBytes, object? userState)
-			: base(totalBytes > 0 ? (int)(bytesTransferred * 100 / totalBytes) : 0, userState)
-		{
-			BytesTransferred = bytesTransferred;
-			TotalBytes = totalBytes;
-		}
-	}
 }

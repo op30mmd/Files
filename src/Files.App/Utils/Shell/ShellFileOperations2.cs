@@ -587,7 +587,7 @@ public partial class ShellFileOperations2 : IDisposable
 
 	private ShellItemArray GetSHArray(IEnumerable<ShellItem> items) => items is ShellItemArray a ? a : new ShellItemArray(items);
 
-	private sealed class OpSink : IFileOperationProgressSink, IActionProgress
+	private sealed class OpSink : IFileOperationProgressSink, Shell32.IActionProgress
 	{
 		private readonly ShellFileOperations2 parent;
 
@@ -634,22 +634,20 @@ public partial class ShellFileOperations2 : IDisposable
 
 		public HRESULT UpdateProgress(uint iWorkTotal, uint iWorkSoFar) => CallChkErr(() => parent.UpdateProgress?.Invoke(parent, new ProgressChangedEventArgs(iWorkTotal == 0 ? 0 : iWorkSoFar * 100.0 / iWorkTotal, null)));
 
-		public HRESULT Begin(ACTION_TYPE action, in CONNECT_INFO pConnectInfo) => HRESULT.S_OK;
+		public void Begin(SPACTION spa, SPBEGINF spbf) { }
 
-		public HRESULT UpdateProgress(ulong ulBytesCompleted, ulong ulBytesTotal)
+		public void UpdateProgress(ulong ulCompleted, ulong ulTotal)
 		{
-			return CallChkErr(() => parent.UpdateProgress?.Invoke(parent, new ProgressChangedEventArgs(ulBytesTotal > 0 ? (double)ulBytesCompleted * 100.0 / ulBytesTotal : 0, null, ulBytesCompleted, ulBytesTotal)));
+			parent.UpdateProgress?.Invoke(parent, new ProgressChangedEventArgs(ulTotal > 0 ? (double)ulCompleted * 100.0 / ulTotal : 0, null, ulCompleted, ulTotal));
 		}
 
-		public HRESULT UpdateText(SPACTIONTEXT sptext, [MarshalAs(UnmanagedType.LPWStr)] string pszText, [MarshalAs(UnmanagedType.Bool)] bool fMayCompact) => HRESULT.S_OK;
+		public void UpdateText(SPTEXT sptext, [MarshalAs(UnmanagedType.LPWStr)] string pszText, [MarshalAs(UnmanagedType.Bool)] bool fCompactPath) { }
 
-		public HRESULT QueryCancel([MarshalAs(UnmanagedType.Bool)] out bool pfCancelled)
-		{
-			pfCancelled = false;
-			return HRESULT.S_OK;
-		}
+		public HRESULT QueryCancel() => HRESULT.S_OK;
 
-		public HRESULT End() => HRESULT.S_OK;
+		public void ResetCancel() { }
+
+		public void End() { }
 
 		private HRESULT CallChkErr(Action action)
 		{

@@ -141,7 +141,7 @@ namespace Files.App.Utils.StatusCenter
 
 		public StatusCenterItemIconKind ItemIconKind { get; private set; }
 
-		public long TotalSize { get; private set; }
+		public ulong TotalSize { get; private set; }
 
 		public long TotalItemsCount { get; private set; }
 
@@ -180,7 +180,7 @@ namespace Files.App.Utils.StatusCenter
 			IEnumerable<string>? destination,
 			bool canProvideProgress = false,
 			long itemsCount = 0,
-			long totalSize = 0,
+			ulong totalSize = 0,
 			CancellationTokenSource? operationCancellationToken = default)
 		{
 			_operationCancellationToken = operationCancellationToken;

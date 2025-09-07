@@ -43,7 +43,7 @@ namespace Files.App.Actions
 				{
 					statusCenterItem.Progress.EnumerationCompleted = true;
 					statusCenterItem.Progress.ItemsCount = items.Count;
-					statusCenterItem.Progress.ReportStatus(FileSystemStatusCode.InProgress);
+					statusCenterItem.Progress.ReportStatus(FileSystemStatusCode.InProgress, percentage: null);
 				}
 
 				await ContentPageContext.SelectedItems.ToList().ParallelForEachAsync(async listedItem =>
@@ -52,7 +52,7 @@ namespace Files.App.Actions
 					if (statusCenterItem is not null)
 					{
 						statusCenterItem.Progress.AddProcessedItemsCount(1);
-						statusCenterItem.Progress.Report();
+						statusCenterItem.Progress.Report(percentage: null);
 					}
 
 					if (listedItem is FtpItem ftpItem)

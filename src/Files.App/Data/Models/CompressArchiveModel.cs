@@ -180,10 +180,10 @@ namespace Files.App.Data.Models
 				var sizeTask = _sizeCalculator.ComputeSizeAsync(cts.Token);
 				_ = sizeTask.ContinueWith(_ =>
 				{
-					_fileSystemProgress.TotalSize = _sizeCalculator.Size;
+					_fileSystemProgress.TotalSize = (ulong)_sizeCalculator.Size;
 					_fileSystemProgress.ItemsCount = _sizeCalculator.ItemsCount;
 					_fileSystemProgress.EnumerationCompleted = true;
-					_fileSystemProgress.Report();
+					_fileSystemProgress.Report(percentage: null);
 				});
 
 				foreach (string directory in directories)
@@ -253,14 +253,14 @@ namespace Files.App.Data.Models
 			_threadingService.ExecuteOnUiThreadAsync(() =>
 			{
 				_fileSystemProgress.FileName = e.FileName;
-				_fileSystemProgress.Report();
+				_fileSystemProgress.Report(percentage: null);
 			});
 		}
 
 		private void Compressor_FileCompressionFinished(object? sender, EventArgs e)
 		{
 			_fileSystemProgress.AddProcessedItemsCount(1);
-			_fileSystemProgress.Report();
+			_fileSystemProgress.Report(percentage: null);
 		}
 
 		private void Compressor_Compressing(object? _, ProgressEventArgs e)

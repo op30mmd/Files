@@ -37,7 +37,7 @@ namespace Files.App.Utils.StatusCenter
 					destination,
 					true,
 					itemsCount,
-					totalSize);
+					(ulong)totalSize);
 			}
 			else if (returnStatus == ReturnResult.InProgress)
 			{
@@ -50,7 +50,7 @@ namespace Files.App.Utils.StatusCenter
 					destination,
 					true,
 					itemsCount,
-					totalSize,
+					(ulong)totalSize,
 					new CancellationTokenSource());
 			}
 			else if (returnStatus == ReturnResult.Success)
@@ -64,7 +64,7 @@ namespace Files.App.Utils.StatusCenter
 					destination,
 					true,
 					itemsCount,
-					totalSize);
+					(ulong)totalSize);
 			}
 			else
 			{
@@ -77,7 +77,7 @@ namespace Files.App.Utils.StatusCenter
 					destination,
 					true,
 					itemsCount,
-					totalSize);
+					(ulong)totalSize);
 			}
 		}
 
@@ -102,7 +102,7 @@ namespace Files.App.Utils.StatusCenter
 					destination,
 					true,
 					itemsCount,
-					totalSize);
+					(ulong)totalSize);
 			}
 			else if (returnStatus == ReturnResult.InProgress)
 			{
@@ -115,7 +115,7 @@ namespace Files.App.Utils.StatusCenter
 					destination,
 					true,
 					itemsCount,
-					totalSize,
+					(ulong)totalSize,
 					new CancellationTokenSource());
 			}
 			else if (returnStatus == ReturnResult.Success)
@@ -129,7 +129,7 @@ namespace Files.App.Utils.StatusCenter
 					destination,
 					true,
 					itemsCount,
-					totalSize);
+					(ulong)totalSize);
 			}
 			else
 			{
@@ -142,7 +142,7 @@ namespace Files.App.Utils.StatusCenter
 					destination,
 					true,
 					itemsCount,
-					totalSize);
+					(ulong)totalSize);
 			}
 		}
 
@@ -168,7 +168,7 @@ namespace Files.App.Utils.StatusCenter
 					null,
 					true,
 					itemsCount,
-					totalSize);
+					(ulong)totalSize);
 			}
 			else if (returnStatus == ReturnResult.InProgress)
 			{
@@ -181,7 +181,7 @@ namespace Files.App.Utils.StatusCenter
 					null,
 					true,
 					itemsCount,
-					totalSize,
+					(ulong)totalSize,
 					new CancellationTokenSource());
 			}
 			else if (returnStatus == ReturnResult.Success)
@@ -195,7 +195,7 @@ namespace Files.App.Utils.StatusCenter
 					null,
 					true,
 					itemsCount,
-					totalSize);
+					(ulong)totalSize);
 			}
 			else
 			{
@@ -208,7 +208,7 @@ namespace Files.App.Utils.StatusCenter
 					null,
 					true,
 					itemsCount,
-					totalSize);
+					(ulong)totalSize);
 			}
 		}
 
@@ -234,7 +234,7 @@ namespace Files.App.Utils.StatusCenter
 					null,
 					true,
 					itemsCount,
-					totalSize);
+					(ulong)totalSize);
 			}
 			else if (returnStatus == ReturnResult.InProgress)
 			{
@@ -247,7 +247,7 @@ namespace Files.App.Utils.StatusCenter
 					null,
 					true,
 					itemsCount,
-					totalSize,
+					(ulong)totalSize,
 					new CancellationTokenSource());
 			}
 			else if (returnStatus == ReturnResult.Success)
@@ -261,7 +261,7 @@ namespace Files.App.Utils.StatusCenter
 					null,
 					true,
 					itemsCount,
-					totalSize);
+					(ulong)totalSize);
 			}
 			else
 			{
@@ -274,7 +274,7 @@ namespace Files.App.Utils.StatusCenter
 					null,
 					true,
 					itemsCount,
-					totalSize);
+					(ulong)totalSize);
 			}
 		}
 
@@ -301,7 +301,7 @@ namespace Files.App.Utils.StatusCenter
 					destination,
 					false,
 					itemsCount,
-					totalSize);
+					(ulong)totalSize);
 			}
 			else if (returnStatus == ReturnResult.InProgress)
 			{
@@ -314,7 +314,7 @@ namespace Files.App.Utils.StatusCenter
 					destination,
 					true,
 					itemsCount,
-					totalSize,
+					(ulong)totalSize,
 					new CancellationTokenSource());
 			}
 			else if (returnStatus == ReturnResult.Success)
@@ -328,7 +328,7 @@ namespace Files.App.Utils.StatusCenter
 					destination,
 					false,
 					itemsCount,
-					totalSize);
+					(ulong)totalSize);
 			}
 			else
 			{
@@ -341,7 +341,7 @@ namespace Files.App.Utils.StatusCenter
 					destination,
 					false,
 					itemsCount,
-					totalSize);
+					(ulong)totalSize);
 			}
 		}
 
@@ -368,7 +368,7 @@ namespace Files.App.Utils.StatusCenter
 					destination,
 					false,
 					itemsCount,
-					totalSize);
+					(ulong)totalSize);
 			}
 			else if (returnStatus == ReturnResult.InProgress)
 			{
@@ -381,7 +381,7 @@ namespace Files.App.Utils.StatusCenter
 					destination,
 					true,
 					itemsCount,
-					totalSize,
+					(ulong)totalSize,
 					new CancellationTokenSource());
 			}
 			else if (returnStatus == ReturnResult.Success)
@@ -395,7 +395,7 @@ namespace Files.App.Utils.StatusCenter
 					destination,
 					false,
 					itemsCount,
-					totalSize);
+					(ulong)totalSize);
 			}
 			else
 			{
@@ -408,7 +408,7 @@ namespace Files.App.Utils.StatusCenter
 					destination,
 					false,
 					itemsCount,
-					totalSize);
+					(ulong)totalSize);
 			}
 		}
 
@@ -430,7 +430,7 @@ namespace Files.App.Utils.StatusCenter
 					null,
 					false,
 					itemsCount,
-					totalSize);
+					(ulong)totalSize);
 			}
 			else if (returnStatus == ReturnResult.InProgress)
 			{
@@ -443,7 +443,7 @@ namespace Files.App.Utils.StatusCenter
 					null,
 					false,
 					itemsCount,
-					totalSize,
+					(ulong)totalSize,
 					new CancellationTokenSource());
 			}
 			else if (returnStatus == ReturnResult.Success)
@@ -457,7 +457,7 @@ namespace Files.App.Utils.StatusCenter
 					null,
 					false,
 					itemsCount,
-					totalSize);
+					(ulong)totalSize);
 			}
 			else
 			{
@@ -470,7 +470,7 @@ namespace Files.App.Utils.StatusCenter
 					null,
 					false,
 					itemsCount,
-					totalSize);
+					(ulong)totalSize);
 			}
 		}
 
@@ -494,7 +494,7 @@ namespace Files.App.Utils.StatusCenter
 					destination,
 					false,
 					itemsCount,
-					totalSize);
+					(ulong)totalSize);
 			}
 			else if (returnStatus == ReturnResult.InProgress)
 			{
@@ -507,7 +507,7 @@ namespace Files.App.Utils.StatusCenter
 					destination,
 					true,
 					itemsCount,
-					totalSize,
+					(ulong)totalSize,
 					new CancellationTokenSource());
 			}
 			else if (returnStatus == ReturnResult.Success)
@@ -521,7 +521,7 @@ namespace Files.App.Utils.StatusCenter
 					destination,
 					false,
 					itemsCount,
-					totalSize);
+					(ulong)totalSize);
 			}
 			else
 			{
@@ -534,7 +534,7 @@ namespace Files.App.Utils.StatusCenter
 					destination,
 					false,
 					itemsCount,
-					totalSize);
+					(ulong)totalSize);
 			}
 		}
 
@@ -555,7 +555,7 @@ namespace Files.App.Utils.StatusCenter
 					string.Empty.CreateEnumerable(),
 					false,
 					itemsCount,
-					totalSize);
+					(ulong)totalSize);
 			}
 			else if (returnStatus == ReturnResult.InProgress)
 			{
@@ -568,7 +568,7 @@ namespace Files.App.Utils.StatusCenter
 					string.Empty.CreateEnumerable(),
 					false,
 					itemsCount,
-					totalSize,
+					(ulong)totalSize,
 					new CancellationTokenSource());
 			}
 			else if (returnStatus == ReturnResult.Success)
@@ -582,7 +582,7 @@ namespace Files.App.Utils.StatusCenter
 					string.Empty.CreateEnumerable(),
 					false,
 					itemsCount,
-					totalSize);
+					(ulong)totalSize);
 			}
 			else
 			{
@@ -595,7 +595,7 @@ namespace Files.App.Utils.StatusCenter
 					string.Empty.CreateEnumerable(),
 					false,
 					itemsCount,
-					totalSize);
+					(ulong)totalSize);
 			}
 		}
 

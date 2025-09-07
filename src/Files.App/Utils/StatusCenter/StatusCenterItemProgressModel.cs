@@ -152,16 +152,6 @@ namespace Files.App.Utils.StatusCenter
 			}
 		}
 
-		public void Report(double? percentage = null)
-		{
-			Report(percentage, null, null);
-		}
-
-		public void Report(ulong? bytesTransferred, ulong? totalBytes)
-		{
-			Report(null, bytesTransferred, totalBytes);
-		}
-
 		public void Report(double? percentage = null, ulong? bytesTransferred = null, ulong? totalBytes = null)
 		{
 			// Set the progress state as success

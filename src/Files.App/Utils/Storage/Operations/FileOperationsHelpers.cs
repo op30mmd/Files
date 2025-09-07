@@ -421,6 +421,7 @@ namespace Files.App.Utils.Storage
 			{
 				using var op = new ShellFileOperations2();
 				var shellOperationResult = new ShellOperationResult();
+				var stopwatch = new System.Diagnostics.Stopwatch();
 
 				op.Options =
 					ShellFileOperations.OperationFlags.NoConfirmMkDir |
@@ -501,17 +502,25 @@ namespace Files.App.Utils.Storage
 					if (progressHandler.CheckCanceled(operationID))
 						throw new Win32Exception(unchecked((int)0x80004005));
 
-					fsProgress.Report(e.ProgressPercentage);
-					progressHandler.UpdateOperation(operationID, e.ProgressPercentage);
+					var totalBytesTransferred = e.BytesProcessed + e.CurrentItemBytesSoFar;
+					var percentage = fsProgress.TotalSize > 0 ? (double)totalBytesTransferred * 100 / fsProgress.TotalSize : 0;
+					fsProgress.ProcessingSizeSpeed = totalBytesTransferred / stopwatch.Elapsed.TotalSeconds;
+					fsProgress.Report(percentage);
+					progressHandler.UpdateOperation(operationID, percentage);
 				};
 
 				try
 				{
+					stopwatch.Start();
 					op.PerformOperations();
 				}
 				catch
 				{
 					moveTcs.TrySetResult(false);
+				}
+				finally
+				{
+					stopwatch.Stop();
 				}
 
 				progressHandler.RemoveOperation(operationID);
@@ -548,7 +557,7 @@ namespace Files.App.Utils.Storage
 			return Win32Helper.StartSTATask(async () =>
 			{
 				using var op = new ShellFileOperations2();
-
+				var stopwatch = new System.Diagnostics.Stopwatch();
 				var shellOperationResult = new ShellOperationResult();
 
 				op.Options =
@@ -632,17 +641,25 @@ namespace Files.App.Utils.Storage
 					if (progressHandler.CheckCanceled(operationID))
 						throw new Win32Exception(unchecked((int)0x80004005));
 
-					fsProgress.Report(e.ProgressPercentage);
-					progressHandler.UpdateOperation(operationID, e.ProgressPercentage);
+					var totalBytesTransferred = e.BytesProcessed + e.CurrentItemBytesSoFar;
+					var percentage = fsProgress.TotalSize > 0 ? (double)totalBytesTransferred * 100 / fsProgress.TotalSize : 0;
+					fsProgress.ProcessingSizeSpeed = totalBytesTransferred / stopwatch.Elapsed.TotalSeconds;
+					fsProgress.Report(percentage);
+					progressHandler.UpdateOperation(operationID, percentage);
 				};
 
 				try
 				{
+					stopwatch.Start();
 					op.PerformOperations();
 				}
 				catch
 				{
 					copyTcs.TrySetResult(false);
+				}
+				finally
+				{
+					stopwatch.Stop();
 				}
 
 				progressHandler.RemoveOperation(operationID);

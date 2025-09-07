@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Diagnostics;
+using System.Runtime.InteropServices;
 using Vanara.PInvoke;
 using static Vanara.PInvoke.Shell32;
 using static Vanara.Windows.Shell.ShellFileOperations;
@@ -590,21 +591,37 @@ public partial class ShellFileOperations2 : IDisposable
 	private sealed class OpSink : IFileOperationProgressSink
 	{
 		private readonly ShellFileOperations2 parent;
+		private long bytesProcessed;
+		private long currentFileSize;
+
+		private static readonly Ole32.PROPERTYKEY PKEY_Size = new(new Guid(0xB725F130, 0x47EF, 0x101A, 0xA5, 0xF1, 0x02, 0x60, 0x8C, 0x9E, 0xEB, 0xAC), 12);
 
 		public OpSink(ShellFileOperations2 ops) => parent = ops;
+
+		public void Reset()
+		{
+			bytesProcessed = 0;
+			currentFileSize = 0;
+		}
 
 		public HRESULT FinishOperations(HRESULT hrResult) => CallChkErr(() => parent.FinishOperations?.Invoke(parent, new ShellFileOpEventArgs(0, null, null, null, null, hrResult)));
 
 		public HRESULT PauseTimer() => HRESULT.E_NOTIMPL;
 
-		public HRESULT PostCopyItem(TRANSFER_SOURCE_FLAGS dwFlags, IShellItem psiItem, IShellItem psiDestinationFolder, [MarshalAs(UnmanagedType.LPWStr)] string pszNewName, HRESULT hrCopy, IShellItem psiNewlyCreated) =>
-			CallChkErr(() => parent.PostCopyItem?.Invoke(parent, new ShellFileOpEventArgs(dwFlags, psiItem, psiDestinationFolder, psiNewlyCreated, pszNewName, hrCopy)));
+		public HRESULT PostCopyItem(TRANSFER_SOURCE_FLAGS dwFlags, IShellItem psiItem, IShellItem psiDestinationFolder, [MarshalAs(UnmanagedType.LPWStr)] string pszNewName, HRESULT hrCopy, IShellItem psiNewlyCreated)
+		{
+			bytesProcessed += currentFileSize;
+			return CallChkErr(() => parent.PostCopyItem?.Invoke(parent, new ShellFileOpEventArgs(dwFlags, psiItem, psiDestinationFolder, psiNewlyCreated, pszNewName, hrCopy)));
+		}
 
 		public HRESULT PostDeleteItem(TRANSFER_SOURCE_FLAGS dwFlags, IShellItem psiItem, HRESULT hrDelete, IShellItem psiNewlyCreated) =>
 			CallChkErr(() => parent.PostDeleteItem?.Invoke(parent, new ShellFileOpEventArgs(dwFlags, psiItem, null, psiNewlyCreated, null, hrDelete)));
 
-		public HRESULT PostMoveItem(TRANSFER_SOURCE_FLAGS dwFlags, IShellItem psiItem, IShellItem psiDestinationFolder, [MarshalAs(UnmanagedType.LPWStr)] string pszNewName, HRESULT hrMove, IShellItem psiNewlyCreated) =>
-			CallChkErr(() => parent.PostMoveItem?.Invoke(parent, new ShellFileOpEventArgs(dwFlags, psiItem, psiDestinationFolder, psiNewlyCreated, pszNewName, hrMove)));
+		public HRESULT PostMoveItem(TRANSFER_SOURCE_FLAGS dwFlags, IShellItem psiItem, IShellItem psiDestinationFolder, [MarshalAs(UnmanagedType.LPWStr)] string pszNewName, HRESULT hrMove, IShellItem psiNewlyCreated)
+		{
+			bytesProcessed += currentFileSize;
+			return CallChkErr(() => parent.PostMoveItem?.Invoke(parent, new ShellFileOpEventArgs(dwFlags, psiItem, psiDestinationFolder, psiNewlyCreated, pszNewName, hrMove)));
+		}
 
 		public HRESULT PostNewItem(TRANSFER_SOURCE_FLAGS dwFlags, IShellItem psiDestinationFolder, [MarshalAs(UnmanagedType.LPWStr)] string pszNewName, [MarshalAs(UnmanagedType.LPWStr)] string pszTemplateName, uint dwFileAttributes, HRESULT hrNew, IShellItem psiNewItem) =>
 			CallChkErr(() => parent.PostNewItem?.Invoke(parent, new ShellFileNewOpEventArgs(dwFlags, null, psiDestinationFolder, psiNewItem, pszNewName, hrNew, pszTemplateName, dwFileAttributes)));
@@ -612,14 +629,28 @@ public partial class ShellFileOperations2 : IDisposable
 		public HRESULT PostRenameItem(TRANSFER_SOURCE_FLAGS dwFlags, IShellItem psiItem, [MarshalAs(UnmanagedType.LPWStr)] string pszNewName, HRESULT hrRename, IShellItem psiNewlyCreated) =>
 			CallChkErr(() => parent.PostRenameItem?.Invoke(parent, new ShellFileOpEventArgs(dwFlags, psiItem, null, psiNewlyCreated, pszNewName, hrRename)));
 
-		public HRESULT PreCopyItem(TRANSFER_SOURCE_FLAGS dwFlags, IShellItem psiItem, IShellItem psiDestinationFolder, [MarshalAs(UnmanagedType.LPWStr)] string pszNewName) =>
-			CallChkErr(() => parent.PreCopyItem?.Invoke(parent, new ShellFileOpEventArgs(dwFlags, psiItem, psiDestinationFolder, null, pszNewName)));
+		public HRESULT PreCopyItem(TRANSFER_SOURCE_FLAGS dwFlags, IShellItem psiItem, IShellItem psiDestinationFolder, [MarshalAs(UnmanagedType.LPWStr)] string pszNewName)
+		{
+			if (psiItem.QueryInterface<IShellItem2>(out var shi2).Succeeded)
+			{
+				if (shi2.GetUInt64(PKEY_Size, out var size).Succeeded)
+					currentFileSize = size;
+			}
+			return CallChkErr(() => parent.PreCopyItem?.Invoke(parent, new ShellFileOpEventArgs(dwFlags, psiItem, psiDestinationFolder, null, pszNewName)));
+		}
 
 		public HRESULT PreDeleteItem(TRANSFER_SOURCE_FLAGS dwFlags, IShellItem psiItem) =>
 			CallChkErr(() => parent.PreDeleteItem?.Invoke(parent, new ShellFileOpEventArgs(dwFlags, psiItem)));
 
-		public HRESULT PreMoveItem(TRANSFER_SOURCE_FLAGS dwFlags, IShellItem psiItem, IShellItem psiDestinationFolder, [MarshalAs(UnmanagedType.LPWStr)] string pszNewName) =>
-			CallChkErr(() => parent.PreMoveItem?.Invoke(parent, new ShellFileOpEventArgs(dwFlags, psiItem, psiDestinationFolder, null, pszNewName)));
+		public HRESULT PreMoveItem(TRANSFER_SOURCE_FLAGS dwFlags, IShellItem psiItem, IShellItem psiDestinationFolder, [MarshalAs(UnmanagedType.LPWStr)] string pszNewName)
+		{
+			if (psiItem.QueryInterface<IShellItem2>(out var shi2).Succeeded)
+			{
+				if (shi2.GetUInt64(PKEY_Size, out var size).Succeeded)
+					currentFileSize = size;
+			}
+			return CallChkErr(() => parent.PreMoveItem?.Invoke(parent, new ShellFileOpEventArgs(dwFlags, psiItem, psiDestinationFolder, null, pszNewName)));
+		}
 
 		public HRESULT PreNewItem(TRANSFER_SOURCE_FLAGS dwFlags, IShellItem psiDestinationFolder, [MarshalAs(UnmanagedType.LPWStr)] string pszNewName) =>
 			CallChkErr(() => parent.PreNewItem?.Invoke(parent, new ShellFileOpEventArgs(dwFlags, null, psiDestinationFolder, null, pszNewName)));
@@ -630,9 +661,14 @@ public partial class ShellFileOperations2 : IDisposable
 
 		public HRESULT ResumeTimer() => HRESULT.E_NOTIMPL;
 
-		public HRESULT StartOperations() => CallChkErr(() => parent.StartOperations?.Invoke(parent, EventArgs.Empty));
+		public HRESULT StartOperations()
+		{
+			Reset();
+			return CallChkErr(() => parent.StartOperations?.Invoke(parent, EventArgs.Empty));
+		}
 
-		public HRESULT UpdateProgress(uint iWorkTotal, uint iWorkSoFar) => CallChkErr(() => parent.UpdateProgress?.Invoke(parent, new ProgressChangedEventArgs(iWorkTotal == 0 ? 0 : iWorkSoFar * 100.0 / iWorkTotal, null)));
+		public HRESULT UpdateProgress(uint iWorkTotal, uint iWorkSoFar) =>
+			CallChkErr(() => parent.UpdateProgress?.Invoke(parent, new ProgressChangedExtendedEventArgs(bytesProcessed, iWorkSoFar, iWorkTotal, null)));
 
 		private HRESULT CallChkErr(Action action)
 		{
@@ -712,26 +748,16 @@ public partial class ShellFileOperations2 : IDisposable
 		public override string ToString() => $"HR:{Result};Src:{SourceItem};DFld:{DestFolder};Dst:{DestItem};Name:{Name}";
 	}
 
-	public delegate void ProgressChangedEventHandler(object? sender, ProgressChangedEventArgs e);
+	public delegate void ProgressChangedEventHandler(object? sender, ProgressChangedExtendedEventArgs e);
 
 	// From System.ComponentModel.ProgressChangedEventArgs but with double percentage
-	public sealed class ProgressChangedEventArgs : EventArgs
+	public class ProgressChangedEventArgs : EventArgs
 	{
-		private readonly double _progressPercentage;
 		private readonly object? _userState;
 
-		public ProgressChangedEventArgs(double progressPercentage, object? userState)
+		public ProgressChangedEventArgs(object? userState)
 		{
-			_progressPercentage = progressPercentage;
 			_userState = userState;
-		}
-
-		public double ProgressPercentage
-		{
-			get
-			{
-				return _progressPercentage;
-			}
 		}
 
 		public object? UserState
@@ -740,6 +766,21 @@ public partial class ShellFileOperations2 : IDisposable
 			{
 				return _userState;
 			}
+		}
+	}
+
+	public sealed class ProgressChangedExtendedEventArgs : ProgressChangedEventArgs
+	{
+		public long BytesProcessed { get; }
+		public long CurrentItemBytesSoFar { get; }
+		public long CurrentItemTotalBytes { get; }
+
+		public ProgressChangedExtendedEventArgs(long bytesProcessed, long currentItemBytesSoFar, long currentItemTotalBytes, object? userState)
+			: base(userState)
+		{
+			BytesProcessed = bytesProcessed;
+			CurrentItemBytesSoFar = currentItemBytesSoFar;
+			CurrentItemTotalBytes = currentItemTotalBytes;
 		}
 	}
 }

@@ -587,7 +587,7 @@ public partial class ShellFileOperations2 : IDisposable
 
 	private ShellItemArray GetSHArray(IEnumerable<ShellItem> items) => items is ShellItemArray a ? a : new ShellItemArray(items);
 
-	private sealed class OpSink : IFileOperationProgressSink
+	private sealed class OpSink : IFileOperationProgressSink, IActionProgress
 	{
 		private readonly ShellFileOperations2 parent;
 
@@ -633,6 +633,23 @@ public partial class ShellFileOperations2 : IDisposable
 		public HRESULT StartOperations() => CallChkErr(() => parent.StartOperations?.Invoke(parent, EventArgs.Empty));
 
 		public HRESULT UpdateProgress(uint iWorkTotal, uint iWorkSoFar) => CallChkErr(() => parent.UpdateProgress?.Invoke(parent, new ProgressChangedEventArgs(iWorkTotal == 0 ? 0 : iWorkSoFar * 100.0 / iWorkTotal, null)));
+
+		public HRESULT Begin(ACTION_TYPE action, in CONNECT_INFO pConnectInfo) => HRESULT.S_OK;
+
+		public HRESULT UpdateProgress(ulong ulBytesCompleted, ulong ulBytesTotal)
+		{
+			return CallChkErr(() => parent.UpdateProgress?.Invoke(parent, new ProgressChangedEventArgs(ulBytesTotal > 0 ? (double)ulBytesCompleted * 100.0 / ulBytesTotal : 0, null, ulBytesCompleted, ulBytesTotal)));
+		}
+
+		public HRESULT UpdateText(SPACTIONTEXT sptext, [MarshalAs(UnmanagedType.LPWStr)] string pszText, [MarshalAs(UnmanagedType.Bool)] bool fMayCompact) => HRESULT.S_OK;
+
+		public HRESULT QueryCancel([MarshalAs(UnmanagedType.Bool)] out bool pfCancelled)
+		{
+			pfCancelled = false;
+			return HRESULT.S_OK;
+		}
+
+		public HRESULT End() => HRESULT.S_OK;
 
 		private HRESULT CallChkErr(Action action)
 		{
@@ -720,10 +737,12 @@ public partial class ShellFileOperations2 : IDisposable
 		private readonly double _progressPercentage;
 		private readonly object? _userState;
 
-		public ProgressChangedEventArgs(double progressPercentage, object? userState)
+		public ProgressChangedEventArgs(double progressPercentage, object? userState, ulong bytesTransferred = 0, ulong totalBytes = 0)
 		{
 			_progressPercentage = progressPercentage;
 			_userState = userState;
+			BytesTransferred = bytesTransferred;
+			TotalBytes = totalBytes;
 		}
 
 		public double ProgressPercentage
@@ -741,5 +760,9 @@ public partial class ShellFileOperations2 : IDisposable
 				return _userState;
 			}
 		}
+
+		public ulong BytesTransferred { get; }
+
+		public ulong TotalBytes { get; }
 	}
 }

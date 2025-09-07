@@ -24,7 +24,7 @@ namespace Files.App.Utils.StatusCenter
 
 		private bool _criticalReport;
 
-		private long _previousProcessedSize;
+		private ulong _previousProcessedSize;
 
 		private long _previousProcessedItemsCount;
 
@@ -63,15 +63,15 @@ namespace Files.App.Utils.StatusCenter
 			set => SetProperty(ref _FileName, value);
 		}
 
-		private long _TotalSize;
-		public long TotalSize
+		private ulong _TotalSize;
+		public ulong TotalSize
 		{
 			get => _TotalSize;
 			set => SetProperty(ref _TotalSize, value);
 		}
 
-		private long _ProcessedSize;
-		public long ProcessedSize
+		private ulong _ProcessedSize;
+		public ulong ProcessedSize
 		{
 			get => _ProcessedSize;
 		}
@@ -136,7 +136,7 @@ namespace Files.App.Utils.StatusCenter
 			_dirtyTracker[nameof(ProcessedItemsCount)] = true;
 		}
 
-		public void SetProcessedSize(long value)
+		public void SetProcessedSize(ulong value)
 		{
 			Interlocked.Exchange(ref _ProcessedSize, value);
 			_dirtyTracker[nameof(ProcessedSize)] = true;
@@ -154,6 +154,16 @@ namespace Files.App.Utils.StatusCenter
 
 		public void Report(double? percentage = null)
 		{
+			Report(percentage, null, null);
+		}
+
+		public void Report(ulong? bytesTransferred, ulong? totalBytes)
+		{
+			Report(null, bytesTransferred, totalBytes);
+		}
+
+		public void Report(double? percentage = null, ulong? bytesTransferred = null, ulong? totalBytes = null)
+		{
 			// Set the progress state as success
 			if ((EnumerationCompleted &&
 				ProcessedItemsCount == ItemsCount &&
@@ -169,24 +179,28 @@ namespace Files.App.Utils.StatusCenter
 			if (_Status is FileSystemStatusCode.Success)
 				CompletedTime = DateTimeOffset.Now;
 
-			if (percentage is not null && Percentage != percentage)
+			if (totalBytes is not null)
+				TotalSize = totalBytes.Value;
+
+			if (bytesTransferred is not null)
+				SetProcessedSize(bytesTransferred.Value);
+			else if (percentage is not null && Percentage != percentage)
 			{
-				SetProcessedSize((long)(TotalSize * percentage / 100));
-
-				if (_sampler2.CheckNow())
-				{
-					ProcessingSizeSpeed = (ProcessedSize - _previousProcessedSize) / (DateTimeOffset.Now - _previousReportTime).TotalSeconds;
-					ProcessingItemsCountSpeed = (ProcessedItemsCount - _previousProcessedItemsCount) / (DateTimeOffset.Now - _previousReportTime).TotalSeconds;
-
-					_dirtyTracker[nameof(ProcessingSizeSpeed)] = true;
-					_dirtyTracker[nameof(ProcessingItemsCountSpeed)] = true;
-
-					_previousReportTime = DateTimeOffset.Now;
-					_previousProcessedSize = ProcessedSize;
-					_previousProcessedItemsCount = ProcessedItemsCount;
-				}
-
+				SetProcessedSize((ulong)(TotalSize * (decimal)percentage / 100m)); // Use decimal for precision
 				Percentage = percentage;
+			}
+
+			if (_sampler2.CheckNow())
+			{
+				ProcessingSizeSpeed = (double)(ProcessedSize - _previousProcessedSize) / (DateTimeOffset.Now - _previousReportTime).TotalSeconds;
+				ProcessingItemsCountSpeed = (ProcessedItemsCount - _previousProcessedItemsCount) / (DateTimeOffset.Now - _previousReportTime).TotalSeconds;
+
+				_dirtyTracker[nameof(ProcessingSizeSpeed)] = true;
+				_dirtyTracker[nameof(ProcessingItemsCountSpeed)] = true;
+
+				_previousReportTime = DateTimeOffset.Now;
+				_previousProcessedSize = ProcessedSize;
+				_previousProcessedItemsCount = ProcessedItemsCount;
 			}
 
 			if (_criticalReport || _sampler.CheckNow())

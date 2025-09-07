@@ -1,6 +1,10 @@
 ﻿// Copyright (c) Files Community
 // Licensed under the MIT License.
 
+// Copyright (c) Files Community
+// Licensed under the MIT License.
+
+using Files.App.CsWin32;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Windows.Win32.Foundation;
@@ -31,7 +35,7 @@ namespace Files.App.Storage
 
 			private static void** PopulateVTable()
 			{
-				void** vtbl = (void**)RuntimeHelpers.AllocateTypeAssociatedMemory(typeof(WindowsBulkOperationsSink), sizeof(void*) * 19);
+				void** vtbl = (void**)RuntimeHelpers.AllocateTypeAssociatedMemory(typeof(WindowsBulkOperationsSink), sizeof(void*) * 24);
 				vtbl[0] = (delegate* unmanaged<WindowsBulkOperationsSink*, Guid*, void**, HRESULT>)&Vtbl.QueryInterface;
 				vtbl[1] = (delegate* unmanaged<WindowsBulkOperationsSink*, int>)&Vtbl.AddRef;
 				vtbl[2] = (delegate* unmanaged<WindowsBulkOperationsSink*, int>)&Vtbl.Release;
@@ -51,6 +55,11 @@ namespace Files.App.Storage
 				vtbl[16] = (delegate* unmanaged<WindowsBulkOperationsSink*, HRESULT>)&Vtbl.ResetTimer;
 				vtbl[17] = (delegate* unmanaged<WindowsBulkOperationsSink*, HRESULT>)&Vtbl.PauseTimer;
 				vtbl[18] = (delegate* unmanaged<WindowsBulkOperationsSink*, HRESULT>)&Vtbl.ResumeTimer;
+				vtbl[19] = (delegate* unmanaged<WindowsBulkOperationsSink*, ACTION_TYPE, CONNECT_INFO*, HRESULT>)&Vtbl.ActionProgress_Begin;
+				vtbl[20] = (delegate* unmanaged<WindowsBulkOperationsSink*, ulong, ulong, HRESULT>)&Vtbl.ActionProgress_UpdateProgress;
+				vtbl[21] = (delegate* unmanaged<WindowsBulkOperationsSink*, SPACTIONTEXT, PCWSTR, BOOL, HRESULT>)&Vtbl.ActionProgress_UpdateText;
+				vtbl[22] = (delegate* unmanaged<WindowsBulkOperationsSink*, BOOL*, HRESULT>)&Vtbl.ActionProgress_QueryCancel;
+				vtbl[23] = (delegate* unmanaged<WindowsBulkOperationsSink*, HRESULT>)&Vtbl.ActionProgress_End;
 
 				return vtbl;
 			}
@@ -63,7 +72,9 @@ namespace Files.App.Storage
 					if (ppv is null)
 						return HRESULT.E_POINTER;
 
-					if (riid->Equals(IID.IID_IUnknown) || riid->Equals(IFileOperationProgressSink.IID_Guid))
+					if (riid->Equals(IID.IID_IUnknown) ||
+						riid->Equals(IFileOperationProgressSink.IID_Guid) ||
+						riid->Equals(IActionProgress.IID_Guid))
 					{
 						Interlocked.Increment(ref @this->_refCount);
 						*ppv = @this;
@@ -155,6 +166,26 @@ namespace Files.App.Storage
 				[UnmanagedCallersOnly]
 				public static HRESULT ResumeTimer(WindowsBulkOperationsSink* @this)
 					=> @this->ResumeTimer();
+
+				[UnmanagedCallersOnly]
+				public static HRESULT ActionProgress_Begin(WindowsBulkOperationsSink* @this, ACTION_TYPE action, CONNECT_INFO* pConnectInfo)
+					=> @this->Begin(action, pConnectInfo);
+
+				[UnmanagedCallersOnly]
+				public static HRESULT ActionProgress_UpdateProgress(WindowsBulkOperationsSink* @this, ulong ulBytesCompleted, ulong ulBytesTotal)
+					=> @this->UpdateProgress(ulBytesCompleted, ulBytesTotal);
+
+				[UnmanagedCallersOnly]
+				public static HRESULT ActionProgress_UpdateText(WindowsBulkOperationsSink* @this, SPACTIONTEXT sptext, PCWSTR pszText, BOOL fMayCompact)
+					=> @this->UpdateText(sptext, pszText, fMayCompact);
+
+				[UnmanagedCallersOnly]
+				public static HRESULT ActionProgress_QueryCancel(WindowsBulkOperationsSink* @this, BOOL* pfCancelled)
+					=> @this->QueryCancel(pfCancelled);
+
+				[UnmanagedCallersOnly]
+				public static HRESULT ActionProgress_End(WindowsBulkOperationsSink* @this)
+					=> @this->End();
 			}
 		}
 	}

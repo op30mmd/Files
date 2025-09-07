@@ -306,7 +306,7 @@ namespace Files.App.Utils.Storage
 					if (progressHandler.CheckCanceled(operationID))
 						throw new Win32Exception(unchecked((int)0x80004005));
 
-					fsProgress.Report(e.ProgressPercentage);
+					fsProgress.Report(null, e.BytesTransferred, e.TotalBytes);
 					progressHandler.UpdateOperation(operationID, e.ProgressPercentage);
 				};
 
@@ -501,7 +501,7 @@ namespace Files.App.Utils.Storage
 					if (progressHandler.CheckCanceled(operationID))
 						throw new Win32Exception(unchecked((int)0x80004005));
 
-					fsProgress.Report(e.ProgressPercentage);
+					fsProgress.Report(null, e.BytesTransferred, e.TotalBytes);
 					progressHandler.UpdateOperation(operationID, e.ProgressPercentage);
 				};
 
@@ -632,7 +632,7 @@ namespace Files.App.Utils.Storage
 					if (progressHandler.CheckCanceled(operationID))
 						throw new Win32Exception(unchecked((int)0x80004005));
 
-					fsProgress.Report(e.ProgressPercentage);
+					fsProgress.Report(null, e.BytesTransferred, e.TotalBytes);
 					progressHandler.UpdateOperation(operationID, e.ProgressPercentage);
 				};
 

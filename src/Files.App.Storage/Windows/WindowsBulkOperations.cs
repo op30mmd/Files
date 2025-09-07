@@ -59,7 +59,7 @@ namespace Files.App.Storage
 		public event EventHandler? OperationsStarted;
 
 		/// <summary>An event that is triggered to indicate progress updates.</summary>
-		public event ProgressChangedEventHandler? ProgressUpdated;
+		public event WindowsBulkOperationsProgressChangedEventHandler? ProgressUpdated;
 
 		// Constructor
 

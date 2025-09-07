@@ -643,7 +643,7 @@ public partial class ShellFileOperations2 : IDisposable
 
 		public void UpdateText(SPTEXT sptext, [MarshalAs(UnmanagedType.LPWStr)] string pszText, [MarshalAs(UnmanagedType.Bool)] bool fCompactPath) { }
 
-		public HRESULT QueryCancel() => HRESULT.S_OK;
+		public bool QueryCancel() => false;
 
 		public void ResetCancel() { }
 

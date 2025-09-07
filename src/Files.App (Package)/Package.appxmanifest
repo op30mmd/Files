@@ -138,7 +138,7 @@
                       DisplayName="Files" />
                 </uap5:Extension>
 
-                <Extension Category="windows.updateTask" EntryPoint="Files.App.BackgroundTasks.UpdateTask" />
+                <Extension Category="windows.updateTask" EntryPoint="Files.App.UpdateTask" />
 
                 <uap:Extension Category="windows.fileTypeAssociation">
                     <uap:FileTypeAssociation Name="archives">
@@ -164,8 +164,8 @@
     <Extensions>
         <Extension Category="windows.activatableClass.inProcessServer">
             <InProcessServer>
-                <Path>Files.App\WinRT.Host.dll</Path>
-                <ActivatableClass ActivatableClassId="Files.App.BackgroundTasks.UpdateTask" ThreadingModel="both" />
+                <Path>Files.exe</Path>
+                <ActivatableClass ActivatableClassId="Files.App.UpdateTask" ThreadingModel="both" />
             </InProcessServer>
         </Extension>
         <Extension Category="windows.activatableClass.outOfProcessServer">

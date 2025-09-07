@@ -7,4 +7,7 @@
     <WindowsSdkPackageVersion>10.0.26100.67-preview</WindowsSdkPackageVersion>
     <WindowsTargetFramework>$(TargetFrameworkVersion)-windows$(TargetWindowsVersion)</WindowsTargetFramework>
   </PropertyGroup>
+  <PropertyGroup>
+    <PublishAot Condition="'$(EnableAot)' == 'true' and '$(MSBuildProjectName)' != 'Files.Core.SourceGenerator'">true</PublishAot>
+  </PropertyGroup>
 </Project>

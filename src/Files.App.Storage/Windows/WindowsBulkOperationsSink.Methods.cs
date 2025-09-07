@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Files Community
 // Licensed under the MIT License.
 
+using Files.App.CsWin32;
 using Windows.Win32.Foundation;
 using Windows.Win32.UI.Shell;
 

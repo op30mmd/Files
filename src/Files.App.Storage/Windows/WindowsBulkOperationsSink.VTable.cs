@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Files Community
 // Licensed under the MIT License.
 
+using Files.App.CsWin32;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Windows.Win32.Foundation;

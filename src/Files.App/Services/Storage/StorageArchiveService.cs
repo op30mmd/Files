@@ -125,8 +125,8 @@ namespace Files.App.Services
 				FileSystemStatusCode.InProgress,
 				zipFile.ArchiveFileData.Count(x => !x.IsDirectory));
 
-			fsProgress.TotalSize = zipFile.ArchiveFileData.Select(x => (long)x.Size).Sum();
-			fsProgress.Report();
+			fsProgress.TotalSize = (ulong)zipFile.ArchiveFileData.Select(x => (long)x.Size).Sum();
+			fsProgress.Report(percentage: null);
 
 			bool isSuccess = false;
 
@@ -169,7 +169,7 @@ namespace Files.App.Services
 			zipFile.Extracting += (s, e) =>
 			{
 				if (fsProgress.TotalSize > 0)
-					fsProgress.Report(e.BytesProcessed / (double)fsProgress.TotalSize * 100);
+					fsProgress.Report(percentage: e.BytesProcessed / (double)fsProgress.TotalSize * 100);
 			};
 
 			zipFile.FileExtractionStarted += (s, e) =>

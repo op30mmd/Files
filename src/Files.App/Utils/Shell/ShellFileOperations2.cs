@@ -587,7 +587,7 @@ public partial class ShellFileOperations2 : IDisposable
 
 	private ShellItemArray GetSHArray(IEnumerable<ShellItem> items) => items is ShellItemArray a ? a : new ShellItemArray(items);
 
-	private sealed class OpSink : IFileOperationProgressSink
+	private sealed class OpSink : IFileOperationProgressSink, Shell32.IActionProgress
 	{
 		private readonly ShellFileOperations2 parent;
 
@@ -633,6 +633,21 @@ public partial class ShellFileOperations2 : IDisposable
 		public HRESULT StartOperations() => CallChkErr(() => parent.StartOperations?.Invoke(parent, EventArgs.Empty));
 
 		public HRESULT UpdateProgress(uint iWorkTotal, uint iWorkSoFar) => CallChkErr(() => parent.UpdateProgress?.Invoke(parent, new ProgressChangedEventArgs(iWorkTotal == 0 ? 0 : iWorkSoFar * 100.0 / iWorkTotal, null)));
+
+		public void Begin(SPACTION spa, SPBEGINF spbf) { }
+
+		public void UpdateProgress(ulong ulCompleted, ulong ulTotal)
+		{
+			parent.UpdateProgress?.Invoke(parent, new ProgressChangedEventArgs(ulTotal > 0 ? (double)ulCompleted * 100.0 / ulTotal : 0, null, ulCompleted, ulTotal));
+		}
+
+		public void UpdateText(SPTEXT sptext, [MarshalAs(UnmanagedType.LPWStr)] string pszText, [MarshalAs(UnmanagedType.Bool)] bool fCompactPath) { }
+
+		public bool QueryCancel() => false;
+
+		public void ResetCancel() { }
+
+		public void End() { }
 
 		private HRESULT CallChkErr(Action action)
 		{
@@ -720,10 +735,12 @@ public partial class ShellFileOperations2 : IDisposable
 		private readonly double _progressPercentage;
 		private readonly object? _userState;
 
-		public ProgressChangedEventArgs(double progressPercentage, object? userState)
+		public ProgressChangedEventArgs(double progressPercentage, object? userState, ulong bytesTransferred = 0, ulong totalBytes = 0)
 		{
 			_progressPercentage = progressPercentage;
 			_userState = userState;
+			BytesTransferred = bytesTransferred;
+			TotalBytes = totalBytes;
 		}
 
 		public double ProgressPercentage
@@ -741,5 +758,9 @@ public partial class ShellFileOperations2 : IDisposable
 				return _userState;
 			}
 		}
+
+		public ulong BytesTransferred { get; }
+
+		public ulong TotalBytes { get; }
 	}
 }
